@@ -14,7 +14,6 @@ const LOCAL_SONGS_DIR = path.join(__dirname, 'songs');
 app.use(express.static(path.join(__dirname, "build")));
 app.use(express.json());
 
-// 4. 修复：通过 HTTP 请求获取远程文件列表（替代本地 fs 读取）
 async function getRemoteFileList() {
     try {
         const response = await fetch(`${SONGS_REMOTE_BASE_URL}file-list.json`);
@@ -26,7 +25,6 @@ async function getRemoteFileList() {
     }
 }
 
-// 5. 修正 /api/files 接口：从远程获取文件列表（而非本地读取 URL）
 app.get('/api/files', async (req, res) => {
     try {
         if (!fsSync.existsSync(LOCAL_SONGS_DIR)) {
