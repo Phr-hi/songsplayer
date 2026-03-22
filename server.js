@@ -7,16 +7,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-// Ä¿±êÄ¿Â¼£¨Ïà¶ÔÓÚserver.jsµÄÂ·¾¶£©
-const SONGS_DIR = path.join(__dirname, 'Songs');
+// ç›®æ ‡ç›®å½•ï¼ˆç›¸å¯¹äºserver.jsçš„è·¯å¾„ï¼‰
+const SONGS_DIR = 'http://songsplayer.infinityfreeapp.com/Songs/'
 
-// ¾²Ì¬ÎÄ¼şÍĞ¹Ü£¨·ÃÎÊindex.html£©
-app.use(express.static(__dirname));
+// é™æ€æ–‡ä»¶æ‰˜ç®¡ï¼ˆè®¿é—®index.htmlï¼‰
+app.use(express.static('http://songsplayer.infinityfreeapp.com/index.html'));
 
-// ½âÎöJSONÇëÇóÌå
+// è§£æJSONè¯·æ±‚ä½“
 app.use(express.json());
 
-// µİ¹é¶ÁÈ¡Ä¿Â¼£¨×î¶àÁ½²ã£©
+// é€’å½’è¯»å–ç›®å½•ï¼ˆæœ€å¤šä¸¤å±‚ï¼‰
 async function readDirRecursive(dir, depth = 0, maxDepth = 2) {
     const results = [];
     if (depth > maxDepth) return results;
@@ -29,16 +29,16 @@ async function readDirRecursive(dir, depth = 0, maxDepth = 2) {
             const relativePath = path.relative(SONGS_DIR, fullPath);
 
             if (entry.isFile()) {
-                // ½öÌí¼ÓÎÄ¼ş£¨ÎÄ¼ş¼Ğ²»Ìá¹©ÏÂÔØ£©
+                // ä»…æ·»åŠ æ–‡ä»¶ï¼ˆæ–‡ä»¶å¤¹ä¸æä¾›ä¸‹è½½ï¼‰
                 results.push({
                     name: entry.name,
                     path: relativePath,
                     depth: depth
                 });
             } else if (entry.isDirectory() && depth < maxDepth) {
-                // µİ¹é¶ÁÈ¡×ÓÎÄ¼ş¼Ğ
+                // é€’å½’è¯»å–å­æ–‡ä»¶å¤¹
                 const subDirResults = await readDirRecursive(fullPath, depth + 1, maxDepth);
-                // Îª×ÓÎÄ¼ş¼ĞÎÄ¼ş²¹³äÎÄ¼ş¼ĞÃû³Æ
+                // ä¸ºå­æ–‡ä»¶å¤¹æ–‡ä»¶è¡¥å……æ–‡ä»¶å¤¹åç§°
                 subDirResults.forEach(item => {
                     item.folder = relativePath;
                 });
@@ -46,65 +46,65 @@ async function readDirRecursive(dir, depth = 0, maxDepth = 2) {
             }
         }
     } catch (err) {
-        console.error('¶ÁÈ¡Ä¿Â¼Ê§°Ü£º', err);
+        console.error('è¯»å–ç›®å½•å¤±è´¥ï¼š', err);
     }
 
     return results;
 }
 
-// ½Ó¿Ú1£º»ñÈ¡SongsÄ¿Â¼ÏÂµÄÎÄ¼şÁĞ±í
+// æ¥å£1ï¼šè·å–Songsç›®å½•ä¸‹çš„æ–‡ä»¶åˆ—è¡¨
 app.get('/api/files', async (req, res) => {
     try {
-        // ¼ì²éSongsÄ¿Â¼ÊÇ·ñ´æÔÚ
+        // æ£€æŸ¥Songsç›®å½•æ˜¯å¦å­˜åœ¨
         if (!fsSync.existsSync(SONGS_DIR)) {
-            await fs.mkdir(SONGS_DIR); // ²»´æÔÚÔò´´½¨
+            await fs.mkdir(SONGS_DIR); // ä¸å­˜åœ¨åˆ™åˆ›å»º
             return res.json([]);
         }
 
         const files = await readDirRecursive(SONGS_DIR);
         res.json(files);
     } catch (error) {
-        res.status(500).json({ error: '»ñÈ¡ÎÄ¼şÁĞ±íÊ§°Ü' });
+        res.status(500).json({ error: 'è·å–æ–‡ä»¶åˆ—è¡¨å¤±è´¥' });
     }
 });
 
-// ½Ó¿Ú2£ºÏÂÔØÎÄ¼ş
+// æ¥å£2ï¼šä¸‹è½½æ–‡ä»¶
 app.get('/api/download', async (req, res) => {
     try {
         const filePath = decodeURIComponent(req.query.path);
         const fullPath = path.join(SONGS_DIR, filePath);
 
-        // °²È«Ğ£Ñé£ºÈ·±£ÏÂÔØµÄÎÄ¼şÔÚSongsÄ¿Â¼ÄÚ
+        // å®‰å…¨æ ¡éªŒï¼šç¡®ä¿ä¸‹è½½çš„æ–‡ä»¶åœ¨Songsç›®å½•å†…
         if (!fullPath.startsWith(SONGS_DIR)) {
-            return res.status(403).send('½ûÖ¹·ÃÎÊ£ºÎÄ¼ş²»ÔÚSongsÄ¿Â¼ÄÚ');
+            return res.status(403).send('ç¦æ­¢è®¿é—®ï¼šæ–‡ä»¶ä¸åœ¨Songsç›®å½•å†…');
         }
 
-        // ¼ì²éÎÄ¼şÊÇ·ñ´æÔÚÇÒÊÇÎÄ¼ş£¨²»ÊÇÎÄ¼ş¼Ğ£©
+        // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨ä¸”æ˜¯æ–‡ä»¶ï¼ˆä¸æ˜¯æ–‡ä»¶å¤¹ï¼‰
         const stat = await fs.stat(fullPath);
         if (!stat.isFile()) {
-            return res.status(400).send('½öÖ§³ÖÏÂÔØÎÄ¼ş£¬²»Ö§³ÖÏÂÔØÎÄ¼ş¼Ğ');
+            return res.status(400).send('ä»…æ”¯æŒä¸‹è½½æ–‡ä»¶ï¼Œä¸æ”¯æŒä¸‹è½½æ–‡ä»¶å¤¹');
         }
 
-        // ÉèÖÃÏÂÔØÏìÓ¦Í·
+        // è®¾ç½®ä¸‹è½½å“åº”å¤´
         res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(path.basename(fullPath))}"`);
         res.setHeader('Content-Type', 'application/octet-stream');
         
-        // Á÷Ê½´«ÊäÎÄ¼ş
+        // æµå¼ä¼ è¾“æ–‡ä»¶
         const fileStream = fsSync.createReadStream(fullPath);
         fileStream.pipe(res);
 
-        // ´¦ÀíÁ÷´íÎó
+        // å¤„ç†æµé”™è¯¯
         fileStream.on('error', (err) => {
-            res.status(500).send('ÎÄ¼şÏÂÔØÊ§°Ü');
+            res.status(500).send('æ–‡ä»¶ä¸‹è½½å¤±è´¥');
         });
     } catch (error) {
-        console.error('ÏÂÔØÎÄ¼şÊ§°Ü£º', error);
-        res.status(500).send('ÏÂÔØÎÄ¼şÊ§°Ü');
+        console.error('ä¸‹è½½æ–‡ä»¶å¤±è´¥ï¼š', error);
+        res.status(500).send('ä¸‹è½½æ–‡ä»¶å¤±è´¥');
     }
 });
 
-// Æô¶¯·şÎñ
+// å¯åŠ¨æœåŠ¡
 app.listen(PORT, () => {
-    console.log(`ÎÄ¼ş¹ÜÀíÆ÷·şÎñÒÑÆô¶¯£ºhttp://localhost:${PORT}`);
-    console.log(`SongsÄ¿Â¼Â·¾¶£º${SONGS_DIR}`);
+    console.log(`æ–‡ä»¶ç®¡ç†å™¨æœåŠ¡å·²å¯åŠ¨ï¼šhttp://localhost:${PORT}`);
+    console.log(`Songsç›®å½•è·¯å¾„ï¼š${SONGS_DIR}`);
 });
