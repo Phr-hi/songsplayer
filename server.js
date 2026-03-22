@@ -7,9 +7,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-const SONGS_DIR = 'http://songsplayer.infinityfreeapp.com/Songs/';
+const SONGS_DIR = 'https://songsplayer.infinityfreeapp.com/Songs/';
 
-app.use(express.static('http://songsplayer.infinityfreeapp.com/index.html'));
+app.use(express.static('https://songsplayer.infinityfreeapp.com/index.html'));
 
 app.use(express.json());
 
