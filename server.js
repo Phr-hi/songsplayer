@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 // 目标目录（相对于server.js的路径）
-const SONGS_DIR = 'http://songsplayer.infinityfreeapp.com/Songs/'
+const SONGS_DIR = 'http://songsplayer.infinityfreeapp.com/Songs/';
 
 // 静态文件托管（访问index.html）
 app.use(express.static('http://songsplayer.infinityfreeapp.com/index.html'));
